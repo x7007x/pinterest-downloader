@@ -7,7 +7,7 @@ A Python library for downloading media (images and videos) from Pinterest.
 You can install the package using pip:
 
 ```bash
-pip install pinterest-downloader
+pip3 install pinterest-downloader --upgrade
 ```
 
 ## Usage
@@ -42,7 +42,6 @@ except Exception as e:
 
 * **`url` (str):** The URL of the Pinterest pin.  **Required.**
 * **`output_dir` (str, optional):** The directory to save the downloaded media. Defaults to "downloads".
-* **`filename` (str, optional):** Specify the desired filename (without extension).  If not provided, a filename will be generated automatically.
 * **`return_url` (bool, optional):** If `True`, returns the direct URL of the media instead of downloading it. Defaults to `False`.
 
 
@@ -52,4 +51,3 @@ except Exception as e:
 - Provides direct links to media files.
 - Option to get the direct URL instead of downloading.
 - Handles potential errors during download and provides informative messages.
-- Allows specifying custom filenames.
