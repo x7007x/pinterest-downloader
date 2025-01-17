@@ -1,4 +1,3 @@
-```markdown
 # Pinterest Downloader
 
 A Python library for downloading media (images and videos) from Pinterest.
@@ -54,9 +53,3 @@ except Exception as e:
 - Option to get the direct URL instead of downloading.
 - Handles potential errors during download and provides informative messages.
 - Allows specifying custom filenames.
-
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-```
