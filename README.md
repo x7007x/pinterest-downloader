@@ -38,7 +38,7 @@ except Exception as e:
 
 ```
 
-**`download_pinterest_media(url, output_dir="downloads", filename=None, return_url=False)`**
+**`download_pinterest_media(url, output_dir="downloads", return_url=False)`**
 
 * **`url` (str):** The URL of the Pinterest pin.  **Required.**
 * **`output_dir` (str, optional):** The directory to save the downloaded media. Defaults to "downloads".
