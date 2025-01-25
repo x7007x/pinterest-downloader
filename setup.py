@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="pinterest_downloader",
-    version="1.0.0",
+    version="2.0.0",
     author="Ahmed Negm",
     author_email="a7mednegm.x@gmail.com",
     description="A Pinterest media downloader",
@@ -14,8 +14,7 @@ setup(
     url="https://github.com/x7007x/pinterest-downloader",
     packages=find_packages(),
     install_requires=[
-        "aiohttp",
-        "asyncio",
+        "aiohttp"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
