@@ -14,7 +14,8 @@ setup(
     url="https://github.com/x7007x/pinterest-downloader",
     packages=find_packages(),
     install_requires=[
-        "requests>=2.25.1",
+        "aiohttp",
+        "asyncio",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
