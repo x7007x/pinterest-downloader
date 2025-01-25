@@ -1,6 +1,6 @@
 # pinterest-downloader
 
-This Python library allows you to search for images on Pinterest and download them asynchronously. It uses asynchronous programming to efficiently search and download multiple images concurrently.
+This Python library allows you to search for images on Pinterest and download them asynchronously. It uses asynchronous programming to efficiently search
 
 ## Features
 
