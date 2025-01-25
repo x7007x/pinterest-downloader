@@ -96,3 +96,15 @@ async def download_pinterest_media(url: str, output_dir: str = '.', return_url: 
                 "success": False,
                 "error": str(e)
             }
+
+async def search_and_download_pinterest(query: str, output_dir: str = '.', max_results: int = 5) -> List[Dict[str, Any]]:
+    search_results = await pinterest_search(query)
+    results = []
+
+    for i, item in enumerate(search_results[:max_results]):
+        result = await download_pinterest_media(item['url'], output_dir)
+        if result['success']:
+            result['thumbnail'] = item['thumbnail']
+            results.append(result)
+
+    return results
