@@ -1,83 +1,98 @@
-import requests
-import re
-import os
+import aiohttp
+import asyncio
 import json
-from typing import Dict, Any
+import os
+import re
+from typing import Dict, Any, List
 
-def download_pinterest_media(url: str, output_dir: str = '.', return_url: bool = False) -> Dict[str, Any]:
-    """
-    Download media (image or video) from a Pinterest URL or return the direct URL.
+PINTEREST_API_URL = "https://www.pinterest.com/resource/BaseSearchResource/get/"
 
-    Args:
-        url (str): The Pinterest URL of the media to download.
-        output_dir (str): The directory to save the downloaded media. Defaults to current directory.
-        return_url (bool): If True, return the direct URL instead of downloading. Defaults to False.
+async def pinterest_search(query: str) -> List[Dict[str, str]]:
+    async with aiohttp.ClientSession() as session:
+        try:
+            params = {
+                "source_url": f"/search/pins/?q={query}&rs=typed",
+                "data": json.dumps({"options": {"query": query, "scope": "pins"}})
+            }
+            headers = {"User-Agent": "Mozilla/5.0"}
+            async with session.get(PINTEREST_API_URL, params=params, headers=headers) as response:
+                data = await response.json()
+                return [
+                    {
+                        "url": item["images"]["orig"]["url"],
+                        "thumbnail": item["images"]["236x"]["url"]
+                    }
+                    for item in data.get("resource_response", {}).get("data", {}).get("results", [])
+                    if "images" in item and "orig" in item["images"] and "236x" in item["images"]
+                ]
+        except (json.JSONDecodeError, KeyError, aiohttp.ClientError):
+            return []
 
-    Returns:
-        Dict[str, Any]: A JSON-like dictionary containing the result of the operation.
-    """
-    try:
-        response = requests.head(url, allow_redirects=True)
-        full_url = response.url
-        
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        
-        response = requests.get(full_url, headers=headers)
-        page_content = response.text
-
-        video_regex = r'"contentUrl":"([^"]+)"'
-        video_match = re.search(video_regex, page_content)
-        
-        if video_match:
-            video_url = video_match.group(1).replace('\\u002F', '/').replace('\\', '')
+async def download_pinterest_media(url: str, output_dir: str = '.', return_url: bool = False) -> Dict[str, Any]:
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.head(url, allow_redirects=True) as response:
+                full_url = str(response.url)
             
-            if video_url:
-                if return_url:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            async with session.get(full_url, headers=headers) as response:
+                page_content = await response.text()
+
+            video_regex = r'"contentUrl":"([^"]+)"'
+            video_match = re.search(video_regex, page_content)
+            
+            if video_match:
+                video_url = video_match.group(1).replace('\\u002F', '/').replace('\\', '')
+                
+                if video_url:
+                    if return_url:
+                        return {
+                            "success": True,
+                            "type": "video",
+                            "url": video_url
+                        }
+                    async with session.get(video_url, headers=headers) as response:
+                        video_data = await response.read()
+                    filename = f'pinterest_video_{os.path.basename(video_url)}'
+                    filepath = os.path.join(output_dir, filename)
+                    with open(filepath, 'wb') as f:
+                        f.write(video_data)
                     return {
                         "success": True,
                         "type": "video",
-                        "url": video_url
+                        "file_path": filepath
                     }
-                video_data = requests.get(video_url, headers=headers).content
-                filename = f'pinterest_video_{os.path.basename(video_url)}'
+
+            image_url = re.search(r'https://i\.pinimg\.com/originals/[^"]+', page_content)
+            if image_url:
+                if return_url:
+                    return {
+                        "success": True,
+                        "type": "image",
+                        "url": image_url.group(0)
+                    }
+                async with session.get(image_url.group(0), headers=headers) as response:
+                    img_data = await response.read()
+                filename = f'pinterest_image_{os.path.basename(image_url.group(0))}'
                 filepath = os.path.join(output_dir, filename)
                 with open(filepath, 'wb') as f:
-                    f.write(video_data)
-                return {
-                    "success": True,
-                    "type": "video",
-                    "file_path": filepath
-                }
-
-        image_url = re.search(r'https://i\.pinimg\.com/originals/[^"]+', page_content)
-        if image_url:
-            if return_url:
+                    f.write(img_data)
                 return {
                     "success": True,
                     "type": "image",
-                    "url": image_url.group(0)
+                    "file_path": filepath
                 }
-            img_data = requests.get(image_url.group(0), headers=headers).content
-            filename = f'pinterest_image_{os.path.basename(image_url.group(0))}'
-            filepath = os.path.join(output_dir, filename)
-            with open(filepath, 'wb') as f:
-                f.write(img_data)
+
             return {
-                "success": True,
-                "type": "image",
-                "file_path": filepath
+                "success": False,
+                "error": "No media found"
             }
-
-        return {
-            "success": False,
-            "error": "No media found"
-        }
-                
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
-
+                    
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
