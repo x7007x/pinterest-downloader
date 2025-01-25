@@ -32,7 +32,7 @@ You can use this library in your Python projects by importing the necessary func
 
 ```python
 import asyncio
-from Pinterest_dowenloader import search_and_download_pinterest
+from pinterest_downloader import search_and_download_pinterest
 
 async def main():
     query = "cute cats"
