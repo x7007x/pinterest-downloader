@@ -30,14 +30,18 @@ You can use this library in your Python projects by importing the necessary func
 
 ```python
 import asyncio
-from pinterest_downloader import pinterest_search
+from pinterest_downloader import *
 
 async def main():
     query = "cute cats"
     results = await pinterest_search(query)
 
     for result in results:
-    	print(result['url'])
+        print(result['url'])
+
+    result = await download_pinterest_media("https://pin.it/6nEi5NMe9", return_url=True)
+    if result['success']:
+        print(f"Type: {result['type']}, URL: {result['url']}")
 
 if __name__ == "__main__":
     asyncio.run(main())
