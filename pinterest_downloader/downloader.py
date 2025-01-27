@@ -42,10 +42,11 @@ async def download_pinterest_media(url: str, output_dir: str = '.', return_url: 
                 page_content = await response.text()
 
             video_regex = r'"contentUrl":"([^"]+)"'
+            video_regex = r'"contentUrl"\s*:\s*"([^"]+\.mp4[^"]*)"'
             video_match = re.search(video_regex, page_content)
             
             if video_match:
-                video_url = video_match.group(1).replace('\\u002F', '/').replace('\\', '').replace('captions/en-us', 'iht/720p').replace('.vtt', '.mp4')
+                video_url = video_match.group(1).replace('\\u002F', '/').replace('\\', '') #.replace('captions/en-us', 'iht/720p').replace('.vtt', '.mp4')
                 
                 if video_url:
                     if return_url:
